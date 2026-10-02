@@ -143,7 +143,7 @@
     setupScrollSpy();
   }
 
-  // ScrollSpy for Active Section in TOC
+  // ScrollSpy: ONLY highlights links in sidebar, NEVER interrupts or hijacks main window scroll!
   let scrollObserver = null;
   function setupScrollSpy() {
     if (scrollObserver) {
@@ -153,7 +153,7 @@
     const sections = document.querySelectorAll('.legal-card');
     const links = document.querySelectorAll('.toc-link');
 
-    if (!('IntersectionObserver' in window)) return;
+    if (!('IntersectionObserver' in window) || sections.length === 0) return;
 
     scrollObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -162,14 +162,11 @@
           links.forEach(link => {
             const isMatch = link.getAttribute('data-target') === id;
             link.classList.toggle('active', isMatch);
-            if (isMatch) {
-              link.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-            }
           });
         }
       });
     }, {
-      rootMargin: '-120px 0px -70% 0px',
+      rootMargin: '-100px 0px -70% 0px',
       threshold: 0
     });
 
@@ -230,6 +227,7 @@
   // Switch Tab
   function setTab(tab, updateHash) {
     if (!['privacy', 'terms'].includes(tab)) return;
+    if (currentTab === tab) return;
     currentTab = tab;
     renderDocument();
     if (updateHash) {
@@ -237,42 +235,46 @@
     }
   }
 
-  // URL Hash / Query Handler
+  // URL Hash / Query Handler - Does NOT re-render if the document is already in view!
   function handleUrlParams() {
     const hash = window.location.hash.toLowerCase().replace('#', '');
     const urlParams = new URLSearchParams(window.location.search);
     const paramLang = urlParams.get('lang');
     const paramTab = urlParams.get('tab');
 
-    // Language priority: query param -> stored -> navigator -> default pt
+    let targetLang = currentLang;
     if (paramLang && ['pt', 'en', 'es', 'vi'].includes(paramLang)) {
-      currentLang = paramLang;
+      targetLang = paramLang;
     } else {
       const stored = localStorage.getItem('guesbay_legal_lang');
       if (stored && ['pt', 'en', 'es', 'vi'].includes(stored)) {
-        currentLang = stored;
+        targetLang = stored;
       }
     }
 
-    // Tab priority: hash -> query -> default privacy
+    let targetTab = 'privacy';
     if (hash === 'termos' || hash.startsWith('terms') || paramTab === 'terms') {
-      currentTab = 'terms';
-    } else {
-      currentTab = 'privacy';
+      targetTab = 'terms';
     }
 
-    renderDocument();
+    const needsRender = (targetLang !== currentLang || targetTab !== currentTab);
+    currentLang = targetLang;
+    currentTab = targetTab;
 
-    // If specific section in hash, scroll to it
+    if (needsRender) {
+      renderDocument();
+    }
+
+    // If specific section in hash, scroll to it smoothly
     if (hash && (hash.startsWith('privacy-') || hash.startsWith('terms-'))) {
       setTimeout(() => {
         const target = document.getElementById(hash);
         if (target) {
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
           target.classList.add('highlighted-section');
-          setTimeout(() => target.classList.remove('highlighted-section'), 2500);
+          setTimeout(() => target.classList.remove('highlighted-section'), 2000);
         }
-      }, 300);
+      }, 100);
     }
   }
 
@@ -294,6 +296,23 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
+
+  // TOC Click: Smoothly scroll to section without triggering full re-renders
+  if (tocNav) {
+    tocNav.addEventListener('click', (e) => {
+      const link = e.target.closest('.toc-link');
+      if (!link) return;
+      const targetId = link.getAttribute('data-target');
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        e.preventDefault();
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', '#' + targetId);
+        targetEl.classList.add('highlighted-section');
+        setTimeout(() => targetEl.classList.remove('highlighted-section'), 2000);
+      }
+    });
+  }
 
   if (clauseSearch) {
     clauseSearch.addEventListener('input', (e) => {
@@ -340,6 +359,6 @@
     handleUrlParams();
   });
 
-  // Init
+  // Initial load
   handleUrlParams();
 })();

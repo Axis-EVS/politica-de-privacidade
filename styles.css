@@ -23,7 +23,6 @@
   --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --header-height: 120px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -34,15 +33,17 @@
   --shadow-glow: 0 0 30px rgba(16, 185, 129, 0.18);
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* Natural, Fluid Document Scroll */
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 140px;
+  scroll-padding-top: 110px;
+  min-height: 100%;
 }
 
 body {
@@ -53,36 +54,34 @@ body {
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
   position: relative;
-  overflow-x: hidden;
   min-height: 100vh;
+  /* CRITICAL: overflow-x: clip does NOT disrupt vertical scrolling or create an artificial scroll container */
+  overflow-x: clip;
+  overflow-y: visible;
+  touch-action: pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Ambient Glow Orbs */
+/* Ambient Glow Orbs - fixed in viewport background to never stretch scroll dimensions */
 .glow-orb {
-  position: absolute;
-  width: 500px;
-  height: 500px;
+  position: fixed;
+  width: 450px;
+  height: 450px;
   border-radius: 50%;
   filter: blur(120px);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.15;
+  opacity: 0.12;
 }
 .glow-top-left {
-  top: -100px;
-  left: -100px;
+  top: -80px;
+  left: -80px;
   background: radial-gradient(circle, #059669 0%, transparent 70%);
 }
 .glow-top-right {
-  top: 150px;
-  right: -100px;
+  top: 120px;
+  right: -80px;
   background: radial-gradient(circle, #0b4627 0%, transparent 70%);
-}
-.glow-bottom {
-  bottom: 200px;
-  left: 20%;
-  background: radial-gradient(circle, #10b981 0%, transparent 70%);
-  opacity: 0.08;
 }
 
 /* Header & Navigation */
@@ -90,7 +89,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(7, 10, 17, 0.85);
+  background: rgba(7, 10, 17, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--bg-card-border);
@@ -99,7 +98,7 @@ body {
 .header-container {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 14px 24px;
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -109,7 +108,7 @@ body {
 .brand-block {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .brand-link {
@@ -121,8 +120,8 @@ body {
 }
 
 .brand-logo {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-sm);
   object-fit: contain;
 }
@@ -134,7 +133,7 @@ body {
 
 .brand-name {
   font-weight: 800;
-  font-size: 19px;
+  font-size: 18px;
   letter-spacing: -0.5px;
   background: linear-gradient(135deg, #ffffff 40%, #10b981 100%);
   -webkit-background-clip: text;
@@ -156,7 +155,7 @@ body {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.3);
   color: #34d399;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 9999px;
@@ -173,14 +172,14 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 /* Language Switcher */
 .lang-selector-wrapper {
   display: flex;
   background: rgba(15, 23, 42, 0.9);
-  padding: 3px;
+  padding: 2px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--bg-card-border);
   gap: 2px;
@@ -191,7 +190,7 @@ body {
   border: none;
   color: var(--text-muted);
   font-family: inherit;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   padding: 5px 8px;
   border-radius: 6px;
@@ -231,7 +230,7 @@ body {
   gap: 6px;
   text-decoration: none;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   padding: 7px 12px;
   border-radius: var(--radius-sm);
@@ -279,7 +278,7 @@ body {
 .tabs-nav-bar {
   background: rgba(11, 16, 28, 0.95);
   border-top: 1px solid rgba(255, 255, 255, 0.04);
-  padding: 8px 24px;
+  padding: 6px 24px;
 }
 
 .tabs-container {
@@ -294,9 +293,9 @@ body {
   border: 1px solid transparent;
   color: var(--text-muted);
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
-  padding: 8px 16px;
+  padding: 7px 14px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: inline-flex;
@@ -321,9 +320,10 @@ body {
 .hero-section {
   position: relative;
   z-index: 1;
-  padding: 42px 24px 28px;
+  padding: 36px 24px 24px;
   border-bottom: 1px solid var(--bg-card-border);
   background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, transparent 100%);
+  overflow: visible;
 }
 
 .hero-container {
@@ -332,48 +332,47 @@ body {
 }
 
 .hero-header h1 {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 800;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.6px;
   color: #ffffff;
   margin-bottom: 8px;
 }
 
 .hero-subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-muted);
   max-width: 860px;
   line-height: 1.5;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 /* Compliance Grid */
 .compliance-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .compliance-pill {
   background: var(--bg-card);
   border: 1px solid var(--bg-card-border);
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   backdrop-filter: blur(8px);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: border-color 0.2s ease;
 }
 
 .compliance-pill:hover {
-  transform: translateY(-2px);
   border-color: var(--primary-border);
 }
 
 .pill-icon {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .pill-info {
@@ -382,13 +381,13 @@ body {
 }
 
 .pill-info strong {
-  font-size: 12.5px;
+  font-size: 12px;
   color: #fff;
   font-weight: 700;
 }
 
 .pill-info span {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-muted);
 }
 
@@ -396,7 +395,8 @@ body {
 .main-layout {
   position: relative;
   z-index: 1;
-  padding: 36px 24px 60px;
+  padding: 32px 24px 60px;
+  overflow: visible;
 }
 
 .content-container {
@@ -406,19 +406,22 @@ body {
   grid-template-columns: 310px 1fr;
   gap: 36px;
   align-items: start;
+  overflow: visible;
 }
 
 /* Sidebar TOC */
 .legal-sidebar {
   position: relative;
+  overflow: visible;
 }
 
 .sidebar-sticky {
   position: sticky;
-  top: 140px;
+  top: 130px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow: visible;
 }
 
 .search-box {
@@ -442,7 +445,7 @@ body {
   color: var(--text-main);
   font-family: inherit;
   font-size: 13px;
-  padding: 10px 32px 10px 36px;
+  padding: 9px 32px 9px 36px;
   border-radius: var(--radius-sm);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -479,7 +482,7 @@ body {
 }
 
 .toc-title {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -496,12 +499,14 @@ body {
 }
 
 .toc-nav {
-  max-height: calc(100vh - 360px);
+  max-height: calc(100vh - 350px);
   overflow-y: auto;
+  overflow-x: hidden;
   padding-right: 4px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Custom Scrollbar for TOC */
@@ -524,21 +529,21 @@ body {
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   text-decoration: none;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.4;
   border: 1px solid transparent;
   transition: all 0.15s ease;
 }
 
 .toc-num {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   font-family: var(--font-mono);
   color: var(--text-sub);
   background: rgba(255, 255, 255, 0.05);
   padding: 1px 5px;
   border-radius: 4px;
-  shrink: 0;
+  flex-shrink: 0;
 }
 
 .toc-text {
@@ -567,39 +572,39 @@ body {
   background: rgba(16, 185, 129, 0.05);
   border: 1px solid var(--primary-border);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 12px 14px;
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: flex-start;
 }
 
 .dpo-icon {
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
 }
 
 .dpo-details strong {
-  font-size: 12.5px;
+  font-size: 12px;
   color: #fff;
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 
 .dpo-details p {
   font-size: 11px;
   color: var(--text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   line-height: 1.35;
 }
 
 .dpo-email {
   display: block;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11.5px;
   color: #34d399;
   text-decoration: none;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .dpo-email:hover {
@@ -615,15 +620,16 @@ body {
 /* Right Content: Legal Document */
 .legal-content-wrapper {
   min-width: 0;
+  overflow: visible;
 }
 
 .lead-box {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.8) 100%);
   border: 1px solid var(--primary-border);
   border-radius: var(--radius-lg);
-  padding: 24px;
-  margin-bottom: 24px;
-  font-size: 15px;
+  padding: 22px;
+  margin-bottom: 20px;
+  font-size: 14.5px;
   line-height: 1.7;
   color: #e2e8f0;
 }
@@ -636,7 +642,8 @@ body {
 .sections-stream {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
+  overflow: visible;
 }
 
 /* Legal Cards */
@@ -644,10 +651,11 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--bg-card-border);
   border-radius: var(--radius-lg);
-  padding: 24px 26px;
+  padding: 22px 24px;
   backdrop-filter: blur(12px);
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
   position: relative;
+  overflow: visible;
 }
 
 .legal-card:hover {
@@ -660,21 +668,21 @@ body {
 }
 
 .legal-card h4 {
-  font-size: 17px;
+  font-size: 16.5px;
   font-weight: 700;
   color: #ffffff;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   line-height: 1.4;
 }
 
 .legal-card h4 .rounded-full,
 .legal-card h4 span.w-1.5 {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background-color: var(--primary);
   box-shadow: 0 0 8px var(--primary);
@@ -683,8 +691,8 @@ body {
 
 .legal-card p {
   color: var(--text-sub);
-  margin-bottom: 12px;
-  font-size: 14.5px;
+  margin-bottom: 10px;
+  font-size: 14px;
   line-height: 1.65;
 }
 
@@ -695,28 +703,28 @@ body {
 .legal-card ul {
   list-style: none;
   padding-left: 0;
-  margin-top: 10px;
-  margin-bottom: 12px;
+  margin-top: 8px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .legal-card ul li {
   position: relative;
-  padding-left: 20px;
+  padding-left: 18px;
   color: var(--text-sub);
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.6;
 }
 
 .legal-card ul li::before {
   content: "•";
   position: absolute;
-  left: 6px;
+  left: 4px;
   top: 0;
   color: var(--primary);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
 }
 
@@ -727,7 +735,7 @@ body {
 
 .legal-card code {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: 12px;
   background: rgba(16, 185, 129, 0.12);
   color: #6ee7b7;
   padding: 2px 6px;
@@ -748,7 +756,7 @@ mark {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 36px;
+  margin-top: 32px;
   padding-top: 20px;
   border-top: 1px solid var(--bg-card-border);
 }
@@ -762,9 +770,9 @@ mark {
   border: 1px solid var(--bg-card-border);
   color: var(--text-sub);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  padding: 10px 16px;
+  padding: 9px 15px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -783,7 +791,8 @@ mark {
   background: #04060b;
   position: relative;
   z-index: 1;
-  padding: 48px 24px 24px;
+  padding: 44px 24px 24px;
+  overflow: visible;
 }
 
 .footer-container {
@@ -791,8 +800,8 @@ mark {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1.5fr;
-  gap: 36px;
-  padding-bottom: 36px;
+  gap: 32px;
+  padding-bottom: 32px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -800,38 +809,38 @@ mark {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
   color: #fff;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .footer-brand-img {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 6px;
 }
 
 .footer-tagline {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-muted);
   line-height: 1.5;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .footer-legal-entity {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #64748b;
 }
 
 .footer-col-title {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   display: block;
 }
 
@@ -845,7 +854,7 @@ mark {
 .footer-links a {
   color: var(--text-muted);
   text-decoration: none;
-  font-size: 13px;
+  font-size: 12.5px;
   transition: color 0.15s ease;
 }
 
@@ -854,7 +863,7 @@ mark {
 }
 
 .footer-text-sm {
-  font-size: 12px;
+  font-size: 11.5px;
   color: #64748b;
   line-height: 1.6;
 }
@@ -862,7 +871,7 @@ mark {
 .footer-bottom-bar {
   max-width: 1240px;
   margin: 0 auto;
-  padding-top: 20px;
+  padding-top: 18px;
 }
 
 .footer-bottom-container {
@@ -870,13 +879,14 @@ mark {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  font-size: 12px;
+  font-size: 11.5px;
   color: #475569;
 }
 
 .footer-bottom-pills {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .pill-sm {
@@ -884,7 +894,7 @@ mark {
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 2px 8px;
   border-radius: 9999px;
-  font-size: 10.5px;
+  font-size: 10px;
   color: #94a3b8;
   font-weight: 600;
 }
@@ -913,7 +923,7 @@ mark {
   transform: translateY(0);
 }
 
-/* Responsive Breakpoints */
+/* Responsive Breakpoints - Mobile-Friendly Flow */
 @media (max-width: 1024px) {
   .content-container {
     grid-template-columns: 260px 1fr;
@@ -925,18 +935,55 @@ mark {
 }
 
 @media (max-width: 768px) {
+  .site-header {
+    position: relative; /* Keep header non-blocking on small mobile screens */
+  }
   .header-container {
     flex-wrap: wrap;
-    padding: 12px 16px;
+    padding: 10px 14px;
+    gap: 10px;
   }
   .version-badge {
     display: none;
   }
-  .content-container {
+  .brand-name {
+    font-size: 16px;
+  }
+  .brand-logo {
+    width: 30px;
+    height: 30px;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .tabs-nav-bar {
+    padding: 4px 14px;
+  }
+  .tab-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .hero-section {
+    padding: 20px 14px 16px;
+  }
+  .hero-header h1 {
+    font-size: 22px;
+  }
+  .compliance-grid {
     grid-template-columns: 1fr;
+  }
+  .main-layout {
+    padding: 16px 14px 40px;
+  }
+  .content-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
   .legal-sidebar {
     order: 2;
+    width: 100%;
   }
   .sidebar-sticky {
     position: static;
@@ -944,11 +991,11 @@ mark {
   .toc-nav {
     max-height: 240px;
   }
-  .compliance-grid {
-    grid-template-columns: 1fr 1fr;
+  .legal-card {
+    padding: 16px 18px;
   }
-  .hero-header h1 {
-    font-size: 26px;
+  .legal-card h4 {
+    font-size: 15px;
   }
   .footer-container {
     grid-template-columns: 1fr;
