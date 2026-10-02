@@ -26,19 +26,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261002_3">
 </head>
 <body class="theme-obsidian">
 
-  <!-- Glow Ambient Background Orbs (position fixed to prevent scroll stretching) -->
+  <!-- Ambient Glow Orbs (Fixed in viewport, pointer-events none, 0 layout footprint) -->
   <div class="glow-orb glow-top-left" aria-hidden="true"></div>
   <div class="glow-orb glow-top-right" aria-hidden="true"></div>
 
   <!-- Header / Navigation Bar -->
-  <header class="site-header">
+  <header class="site-header" id="top-header">
     <div class="header-container">
       <div class="brand-block">
-        <a href="#privacidade" class="brand-link" id="brand-logo-link">
+        <a href="javascript:void(0)" class="brand-link" id="brand-logo-link" title="Guesbay Central Jurídica">
           <img src="assets/logo.png" alt="Guesbay Logo" class="brand-logo" onerror="this.src='assets/icon.png'">
           <div class="brand-text">
             <span class="brand-name">Guesbay</span>
@@ -101,7 +101,7 @@
   </header>
 
   <!-- Hero Section with Compliance Badges -->
-  <section class="hero-section">
+  <section class="hero-section" id="hero-section">
     <div class="hero-container">
       <div class="hero-header">
         <h1 id="doc-title">Política de Privacidade</h1>
@@ -160,7 +160,7 @@
   <main class="main-layout">
     <div class="content-container">
 
-      <!-- Left Sidebar: Sticky Table of Contents & Quick Search (Desktop) -->
+      <!-- Left Sidebar: Table of Contents & Quick Search (Desktop) -->
       <aside class="legal-sidebar" id="legal-sidebar">
         <div class="sidebar-sticky">
           
@@ -294,6 +294,10 @@
       <!-- Right Column: Document Preamble + Full Legal Clauses -->
       <article class="legal-content-wrapper" id="legal-content-wrapper">
         
+        <!-- Named Anchor Targets for Browser Fragment Reliability -->
+        <div id="privacidade" style="position:relative; top:-120px; visibility:hidden;"></div>
+        <div id="termos" style="position:relative; top:-120px; visibility:hidden;"></div>
+
         <!-- Document Preamble / Lead Paragraph -->
         <div class="lead-box" id="lead-box">
           <p class="font-semibold text-on-surface text-[14px]">
@@ -586,8 +590,8 @@
       <div class="footer-col">
         <strong class="footer-col-title">Documentos Legais</strong>
         <ul class="footer-links">
-          <li><a href="#privacidade" class="footer-link-tab" data-tab="privacy">Política de Privacidade</a></li>
-          <li><a href="#termos" class="footer-link-tab" data-tab="terms">Termos de Uso</a></li>
+          <li><a href="javascript:void(0)" class="footer-link-tab" data-tab="privacy">Política de Privacidade</a></li>
+          <li><a href="javascript:void(0)" class="footer-link-tab" data-tab="terms">Termos de Uso</a></li>
           <li><a href="mailto:axisevs@gmail.com">Contato do DPO / Privacidade</a></li>
         </ul>
       </div>
@@ -626,7 +630,7 @@
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="legal_data.js"></script>
-  <script src="script.js"></script>
+  <script src="legal_data.js?v=20261002_3"></script>
+  <script src="script.js?v=20261002_3"></script>
 </body>
 </html>

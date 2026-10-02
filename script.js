@@ -2,6 +2,11 @@
 (function() {
   'use strict';
 
+  // Prevent browser history/anchor restoring fight
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
   // State
   let currentLang = 'pt';
   let currentTab = 'privacy'; // 'privacy' | 'terms'
@@ -26,6 +31,7 @@
   const shareDocBtn = document.getElementById('share-doc-btn');
   const toast = document.getElementById('toast');
   const footerTabLinks = document.querySelectorAll('.footer-link-tab');
+  const brandLogoLink = document.getElementById('brand-logo-link');
 
   // Multi-language UI String Dictionary
   const UI_STRINGS = {
@@ -139,38 +145,6 @@
     // Reset search
     if (clauseSearch) clauseSearch.value = '';
     if (clearSearchBtn) clearSearchBtn.style.display = 'none';
-
-    setupScrollSpy();
-  }
-
-  // ScrollSpy: ONLY highlights links in sidebar, NEVER interrupts or hijacks main window scroll!
-  let scrollObserver = null;
-  function setupScrollSpy() {
-    if (scrollObserver) {
-      scrollObserver.disconnect();
-    }
-
-    const sections = document.querySelectorAll('.legal-card');
-    const links = document.querySelectorAll('.toc-link');
-
-    if (!('IntersectionObserver' in window) || sections.length === 0) return;
-
-    scrollObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id;
-          links.forEach(link => {
-            const isMatch = link.getAttribute('data-target') === id;
-            link.classList.toggle('active', isMatch);
-          });
-        }
-      });
-    }, {
-      rootMargin: '-100px 0px -70% 0px',
-      threshold: 0
-    });
-
-    sections.forEach(sec => scrollObserver.observe(sec));
   }
 
   // Live Search / Filter
@@ -199,9 +173,7 @@
     if (tocCountBadge) tocCountBadge.textContent = matchingSections.length + ' ' + ui.sectionsCount;
 
     // Highlight and render
-    sectionsStream.innerHTML = matchingSections.map(s => {
-      return s.html;
-    }).join('\n\n');
+    sectionsStream.innerHTML = matchingSections.map(s => s.html).join('\n\n');
 
     tocNav.innerHTML = matchingSections.map(s => {
       const cleanTitle = s.title.replace(/^\d+\.\s*/, '');
@@ -212,70 +184,41 @@
         </a>
       `;
     }).join('\n');
-
-    setupScrollSpy();
   }
 
   // Switch Language
   function setLanguage(lang) {
     if (!['pt', 'en', 'es', 'vi'].includes(lang)) return;
+    if (currentLang === lang) return;
     currentLang = lang;
-    localStorage.setItem('guesbay_legal_lang', lang);
+    try {
+      localStorage.setItem('guesbay_legal_lang', lang);
+    } catch (_) {}
     renderDocument();
   }
 
   // Switch Tab
-  function setTab(tab, updateHash) {
+  function setTab(tab) {
     if (!['privacy', 'terms'].includes(tab)) return;
     if (currentTab === tab) return;
     currentTab = tab;
     renderDocument();
-    if (updateHash) {
-      window.location.hash = tab === 'privacy' ? 'privacidade' : 'termos';
-    }
+    window.scrollTo(0, 0);
   }
 
-  // URL Hash / Query Handler - Does NOT re-render if the document is already in view!
-  function handleUrlParams() {
-    const hash = window.location.hash.toLowerCase().replace('#', '');
-    const urlParams = new URLSearchParams(window.location.search);
-    const paramLang = urlParams.get('lang');
-    const paramTab = urlParams.get('tab');
-
-    let targetLang = currentLang;
-    if (paramLang && ['pt', 'en', 'es', 'vi'].includes(paramLang)) {
-      targetLang = paramLang;
-    } else {
-      const stored = localStorage.getItem('guesbay_legal_lang');
-      if (stored && ['pt', 'en', 'es', 'vi'].includes(stored)) {
-        targetLang = stored;
-      }
-    }
-
-    let targetTab = 'privacy';
-    if (hash === 'termos' || hash.startsWith('terms') || paramTab === 'terms') {
-      targetTab = 'terms';
-    }
-
-    const needsRender = (targetLang !== currentLang || targetTab !== currentTab);
-    currentLang = targetLang;
-    currentTab = targetTab;
-
-    if (needsRender) {
-      renderDocument();
-    }
-
-    // If specific section in hash, scroll to it smoothly
-    if (hash && (hash.startsWith('privacy-') || hash.startsWith('terms-'))) {
-      setTimeout(() => {
-        const target = document.getElementById(hash);
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          target.classList.add('highlighted-section');
-          setTimeout(() => target.classList.remove('highlighted-section'), 2000);
-        }
-      }, 100);
-    }
+  // Smooth scroll to an element safely without changing window.location.hash
+  function scrollToElement(targetEl) {
+    if (!targetEl) return;
+    const headerEl = document.getElementById('top-header');
+    const headerHeight = headerEl ? headerEl.offsetHeight : 100;
+    const rect = targetEl.getBoundingClientRect();
+    const targetY = rect.top + window.pageYOffset - headerHeight - 16;
+    window.scrollTo({
+      top: Math.max(0, targetY),
+      behavior: 'smooth'
+    });
+    targetEl.classList.add('highlighted-section');
+    setTimeout(() => targetEl.classList.remove('highlighted-section'), 2000);
   }
 
   // Event Listeners
@@ -285,31 +228,42 @@
     });
   });
 
-  if (tabPrivacyBtn) tabPrivacyBtn.addEventListener('click', () => setTab('privacy', true));
-  if (tabTermsBtn) tabTermsBtn.addEventListener('click', () => setTab('terms', true));
+  if (tabPrivacyBtn) {
+    tabPrivacyBtn.addEventListener('click', () => setTab('privacy'));
+  }
+  if (tabTermsBtn) {
+    tabTermsBtn.addEventListener('click', () => setTab('terms'));
+  }
+
+  if (brandLogoLink) {
+    brandLogoLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      setTab('privacy');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
   footerTabLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const tab = link.getAttribute('data-tab');
-      setTab(tab, true);
+      setTab(tab);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
 
-  // TOC Click: Smoothly scroll to section without triggering full re-renders
+  // TOC Click: Smoothly scroll to section without triggering hash jumps
   if (tocNav) {
     tocNav.addEventListener('click', (e) => {
       const link = e.target.closest('.toc-link');
       if (!link) return;
+      e.preventDefault();
       const targetId = link.getAttribute('data-target');
       const targetEl = document.getElementById(targetId);
       if (targetEl) {
-        e.preventDefault();
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        history.pushState(null, '', '#' + targetId);
-        targetEl.classList.add('highlighted-section');
-        setTimeout(() => targetEl.classList.remove('highlighted-section'), 2000);
+        document.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        scrollToElement(targetEl);
       }
     });
   }
@@ -355,10 +309,14 @@
     });
   }
 
-  window.addEventListener('hashchange', () => {
-    handleUrlParams();
-  });
-
-  // Initial load
-  handleUrlParams();
+  // Initial setup: check saved language without modifying scroll position
+  try {
+    const stored = localStorage.getItem('guesbay_legal_lang');
+    if (stored && ['pt', 'en', 'es', 'vi'].includes(stored)) {
+      currentLang = stored;
+      if (currentLang !== 'pt') {
+        renderDocument();
+      }
+    }
+  } catch (_) {}
 })();
